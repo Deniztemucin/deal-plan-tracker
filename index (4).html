@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deal Plan Tracker — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deepest: #060B2E;
+    --navy-deep: #0A1142;
+    --navy: #0E1858;
+    --navy-soft: #182370;
+    --navy-line: #1F2B85;
+    --navy-line-soft: #141E68;
+
+    --blue-primary: #3344FF;
+    --blue-bright: #4C5EFF;
+    --blue-tint: #1A2378;
+    --blue-tint-soft: #131D6B;
+    --blue-glow: rgba(76, 94, 255, 0.15);
+
+    --ink: #F0F2FF;
+    --ink-soft: #B4BBE8;
+    --ink-mute: #7A82B8;
+    --ink-faint: #4A5290;
+
+    --rag-green: #10B981;
+    --rag-green-soft: rgba(16, 185, 129, 0.15);
+    --rag-amber: #F59E0B;
+    --rag-amber-soft: rgba(245, 158, 11, 0.15);
+    --rag-red: #EF4444;
+    --rag-red-soft: rgba(239, 68, 68, 0.15);
+
+    --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    background: var(--navy-deepest);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at top left, rgba(51, 68, 255, 0.08), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(76, 94, 255, 0.05), transparent 50%),
+      var(--navy-deepest);
+    min-height: 100vh;
+  }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--navy-line);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    background: var(--navy-deep);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: var(--blue-primary);
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    font-style: italic;
+    box-shadow: 0 0 16px var(--blue-glow);
+  }
+
+  .brand small {
+    font-weight: 500;
+    margin-left: 4px;
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--blue-tint);
+    border-radius: 4px;
+    color: var(--blue-bright);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-bright), var(--blue-primary));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 56px - 32px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--navy-line);
+    background: var(--navy-deep);
+    padding: 20px 16px;
+    overflow-y: auto;
+  }
+
+  .sidebar-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    padding: 0 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .new-deal-btn {
+    width: 100%;
+    background: var(--blue-primary);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    transition: all 0.15s;
+  }
+  .new-deal-btn:hover {
+    background: var(--blue-bright);
+    box-shadow: 0 0 20px var(--blue-glow);
+  }
+
+  .deal-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .deal-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.12s;
+    border: 1px solid transparent;
+  }
+  .deal-item:hover { background: var(--navy-soft); }
+  .deal-item.active {
+    background: var(--blue-tint);
+    border-color: var(--blue-tint);
+  }
+
+  .deal-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .deal-meta {
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+
+  .freshness-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .freshness-green { background: var(--rag-green); box-shadow: 0 0 6px var(--rag-green); }
+  .freshness-amber { background: var(--rag-amber); box-shadow: 0 0 6px var(--rag-amber); }
+  .freshness-red { background: var(--rag-red); box-shadow: 0 0 6px var(--rag-red); }
+  .freshness-grey { background: var(--ink-faint); }
+
+  .main {
+    padding: 32px 40px 80px;
+    max-width: 1200px;
+    overflow-y: auto;
+  }
+
+  .deal-header { margin-bottom: 28px; }
+
+  .deal-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    outline: none;
+  }
+  h1[contenteditable]:focus { box-shadow: 0 2px 0 var(--blue-primary); }
+  [contenteditable]:focus { outline: none; }
+
+  .freshness-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .freshness-pill.green { background: var(--rag-green-soft); color: var(--rag-green); }
+  .freshness-pill.amber { background: var(--rag-amber-soft); color: var(--rag-amber); }
+  .freshness-pill.red { background: var(--rag-red-soft); color: var(--rag-red); }
+  .freshness-pill.grey { background: var(--navy-soft); color: var(--ink-mute); }
+
+  .deal-sub { color: var(--ink-soft); font-size: 14px; }
+  .deal-sub [contenteditable] {
+    color: var(--ink);
+    border-bottom: 1px dashed transparent;
+  }
+  .deal-sub [contenteditable]:hover { border-color: var(--ink-faint); }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--navy-line);
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.12s;
+  }
+  .tab:hover { color: var(--ink-soft); }
+  .tab.active {
+    color: var(--blue-bright);
+    border-bottom-color: var(--blue-bright);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  .section-title + .section-sub {
+    margin-top: -12px;
+    margin-bottom: 16px;
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+
+  .card {
+    border: 1px solid var(--navy-line);
+    border-radius: 12px;
+    background: var(--navy-deep);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--navy-line);
+    background: var(--navy);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--blue-bright);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-body { padding: 20px; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 16px;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .field-row .field { margin-bottom: 0; }
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-mute);
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1px solid var(--navy-line);
+    border-radius: 6px;
+    background: var(--navy);
+    color: var(--ink);
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--blue-primary);
+    box-shadow: 0 0 0 3px var(--blue-tint);
+  }
+  textarea { resize: vertical; min-height: 70px; font-family: inherit; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--navy);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--blue-bright);
+    border-bottom: 1px solid var(--navy-line);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--navy-line-soft);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--navy-line-soft); }
+
+  td input, td select, td textarea {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    background: transparent;
+  }
+  td input:hover, td select:hover, td textarea:hover {
+    border-color: var(--navy-line);
+    background: var(--navy);
+  }
+  td input:focus, td select:focus, td textarea:focus {
+    background: var(--navy);
+  }
+
+  .rag-select {
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+  }
+  .rag-select.green { background: var(--rag-green-soft); color: var(--rag-green); }
+  .rag-select.amber { background: var(--rag-amber-soft); color: var(--rag-amber); }
+  .rag-select.red { background: var(--rag-red-soft); color: var(--rag-red); }
+  .rag-select option { background: var(--navy-deep); color: var(--ink); }
+
+  .add-row-btn, .btn {
+    background: var(--navy);
+    border: 1px solid var(--navy-line);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.12s;
+  }
+  .add-row-btn:hover, .btn:hover {
+    border-color: var(--blue-primary);
+    color: var(--blue-bright);
+  }
+  .btn-primary {
+    background: var(--blue-primary);
+    color: white;
+    border-color: var(--blue-primary);
+  }
+  .btn-primary:hover { background: var(--blue-bright); border-color: var(--blue-bright); color: white; }
+
+  .table-foot {
+    padding: 12px 16px;
+    border-top: 1px solid var(--navy-line);
+    background: var(--navy);
+  }
+
+  .remove-row {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .remove-row:hover { color: var(--rag-red); background: var(--rag-red-soft); }
+
+  .swot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .swot-box {
+    border: 1px solid var(--navy-line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--navy-deep);
+  }
+  .swot-box-header {
+    padding: 10px 14px;
+    background: var(--navy);
+    color: var(--blue-bright);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .swot-box.threat .swot-box-header { background: var(--rag-red-soft); color: var(--rag-red); }
+  .swot-box.weakness .swot-box-header { background: var(--rag-amber-soft); color: var(--rag-amber); }
+  .swot-box.opportunity .swot-box-header { background: var(--rag-green-soft); color: var(--rag-green); }
+  .swot-box textarea {
+    width: 100%;
+    border: none;
+    padding: 12px 14px;
+    min-height: 110px;
+    font-size: 13px;
+    line-height: 1.55;
+    background: var(--navy-deep);
+  }
+  .swot-box textarea:focus { box-shadow: none; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--navy-line);
+    border: 1px solid var(--navy-line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .stat-cell {
+    background: var(--navy-deep);
+    padding: 16px 18px;
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .stat-cell input {
+    border: none;
+    padding: 0;
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    background: transparent;
+    width: 100%;
+    color: var(--ink);
+  }
+  .stat-cell input:focus { box-shadow: none; }
+
+  .empty {
+    display: grid;
+    place-items: center;
+    min-height: 60vh;
+    text-align: center;
+    color: var(--ink-mute);
+  }
+  .empty-art {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 80px;
+    color: var(--blue-tint);
+    margin-bottom: 16px;
+  }
+  .empty h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .prototype-banner {
+    background: linear-gradient(90deg, var(--blue-primary), var(--blue-bright));
+    color: white;
+    padding: 8px 16px;
+    font-size: 12px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .prototype-banner b { font-weight: 600; }
+
+  .save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 280px;
+    right: 0;
+    background: var(--navy-deep);
+    border-top: 1px solid var(--navy-line);
+    padding: 10px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink-mute);
+    z-index: 40;
+  }
+  .save-bar.hidden { display: none; }
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .save-status .dot {
+    width: 6px; height: 6px;
+    background: var(--rag-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--rag-green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 11, 46, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--navy-deep);
+    border: 1px solid var(--navy-line);
+    border-radius: 14px;
+    padding: 28px;
+    width: 420px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 18px;
+  }
+
+  .meeting-card {
+    border: 1px solid var(--navy-line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--navy-deep);
+  }
+  .meeting-card.upcoming { border-left: 3px solid var(--blue-primary); }
+  .meeting-card.past { border-left: 3px solid var(--ink-faint); }
+  .meeting-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+    gap: 16px;
+  }
+  .meeting-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    position: relative;
+    margin: 16px 0 8px;
+  }
+  .timeline-step {
+    position: relative;
+    padding-top: 24px;
+  }
+  .timeline-step::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    background: var(--blue-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--blue-glow);
+  }
+  .timeline-step::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    right: -16px;
+    height: 2px;
+    background: var(--blue-tint);
+  }
+  .timeline-step:last-child::after { display: none; }
+  .timeline-step-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--blue-bright);
+    margin-bottom: 6px;
+  }
+
+  .info-tip {
+    margin-top: 24px;
+    padding: 12px 14px;
+    background: var(--navy);
+    border-radius: 8px;
+    border-left: 3px solid var(--blue-primary);
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .info-tip b { color: var(--blue-bright); }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--navy-line); }
+    .save-bar { left: 0; }
+    .main { padding: 20px; }
+    .swot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="prototype-banner">
+  <b>Prototype</b> · For vision &amp; scoping discussion only · Data saves locally in your browser
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">d</div>
+    Deal Plan Tracker
+    <small>prototype</small>
+  </div>
+  <div class="topbar-actions">
+    <div class="user-chip">
+      <div class="user-avatar">U</div>
+      <span>Sample User</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <button class="new-deal-btn" id="newDealBtn">
+      <span style="font-size:16px;line-height:1">+</span> New deal plan
+    </button>
+    <div class="sidebar-label">Active deals</div>
+    <ul class="deal-list" id="dealList"></ul>
+
+    <div class="info-tip">
+      <b>Freshness signal</b><br>
+      Plans updated in the last <b>14 days</b> are green, <b>15–30</b> amber, <b>30+</b> red. Keep yours green.
+    </div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div class="save-bar hidden" id="saveBar">
+  <div class="save-status">
+    <span class="dot"></span>
+    <span id="saveText">All changes saved</span>
+  </div>
+  <div>Last updated <span id="lastUpdated">—</span></div>
+</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>New deal plan</h3>
+    <div class="field">
+      <label>Client name</label>
+      <input type="text" id="newDealName" placeholder="e.g. Acme Capital" />
+    </div>
+    <div class="field">
+      <label>Lead owner</label>
+      <input type="text" id="newDealOwner" placeholder="e.g. owner name" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="cancelNew">Cancel</button>
+      <button class="btn btn-primary" id="createNew">Create plan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'dealTrackerData_v2';
+const SECTIONS = ['summary', 'engagement', 'value', 'swot', 'goals', 'meetings'];
+const TAB_LABELS = {
+  summary: 'Executive summary',
+  engagement: 'Engagement map',
+  value: 'Value proposition',
+  swot: 'SWOT & competition',
+  goals: 'Goals → Actions',
+  meetings: 'Meetings log'
+};
+
+const blank = (name='Untitled deal', owner='') => ({
+  id: 'd_' + Math.random().toString(36).slice(2, 9),
+  name, owner,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+  profile: {
+    aum: '', revenue: '', incrementalRevenue: '',
+    decisionDate: '', shareOfWallet: '',
+    currentRAG: 'amber', priorRAG: 'amber',
+    segment: '', acquisitionProfile: '',
+    strategicFocus: '', whatsWorking: '', whatsNeeded: '',
+    nextStrategy: ''
+  },
+  engagement: [
+    { contact: '', position: '', role: 'Decision Maker', sttOwner: '', rag: 'amber', path: '', lastMeeting: '' }
+  ],
+  upcomingPhase1: '',
+  upcomingPhase2: '',
+  upcomingPhase3: '',
+  value: {
+    objective: '',
+    howWeSell: '',
+    competitorTalk: '',
+    sttResponse: '',
+    problemStatement: '',
+    sttSolution: '',
+    clientOutcomes: '',
+    redFlags: '',
+    mitigation: ''
+  },
+  swot: { strength: '', weakness: '', opportunity: '', threat: '' },
+  competitors: [
+    { name: '', overview: '', quality: '', price: '', liftOut: '', technology: '' }
+  ],
+  goals: [
+    { strategy: '', goal: '', owner: '', action: '', targetDate: '', status: 'amber', comments: '' }
+  ],
+  recentMeetings: [
+    { date: '', with: '', topics: '', notes: '' }
+  ],
+  upcomingMeetings: [
+    { date: '', client: '', stt: '', focus: '' }
+  ]
+});
+
+let state = load();
+let activeId = state.deals[0]?.id || null;
+let activeTab = 'summary';
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.deals && parsed.deals.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return { deals: [seed()] };
+}
+
+/* Fully fictional sample. Generic placeholders only. */
+function seed() {
+  const d = blank('Acme Capital (sample)', 'Sample Owner A');
+  d.profile.aum = '$100bn';
+  d.profile.revenue = '$10.0M';
+  d.profile.incrementalRevenue = '$2.5M';
+  d.profile.decisionDate = 'Q1 2027';
+  d.profile.shareOfWallet = '15%';
+  d.profile.currentRAG = 'green';
+  d.profile.priorRAG = 'amber';
+  d.profile.segment = 'Sample segment';
+  d.profile.acquisitionProfile = 'New business opportunity (sample)';
+  d.profile.strategicFocus = '• Sample focus area one\n• Sample focus area two\n• Sample focus area three';
+  d.profile.whatsWorking = 'Sample text describing what is working well in the relationship today.';
+  d.profile.whatsNeeded = 'Sample text describing gaps, concerns, or items needing resolution.';
+  d.profile.nextStrategy = 'Sample text describing the forward strategy for this client.';
+  d.engagement = [
+    { contact: 'Sample Contact A', position: 'Sample Title', role: 'Decision Maker', sttOwner: 'Sample Owner A', rag: 'green', path: 'Sample relationship development plan', lastMeeting: '2026-04' },
+    { contact: 'Sample Contact B', position: 'Sample Title', role: 'Champion', sttOwner: 'Sample Owner B', rag: 'amber', path: 'Sample next step description', lastMeeting: '2026-02' },
+    { contact: 'Sample Contact C', position: 'Sample Title', role: 'Influencer', sttOwner: 'Sample Owner A', rag: 'amber', path: 'Sample plan to deepen relationship', lastMeeting: '' }
+  ];
+  d.upcomingPhase1 = 'Sample activity for the near-term phase.';
+  d.upcomingPhase2 = 'Sample activity for the mid-term phase.';
+  d.upcomingPhase3 = 'Sample activity for the longer-term phase.';
+  d.value.objective = '1) Sample client objective one\n2) Sample client objective two\n3) Sample client objective three';
+  d.value.howWeSell = '1) Sample differentiated message with proof point\n2) Sample value angle\n3) Sample third pillar of the pitch';
+  d.value.competitorTalk = 'Competitor A: Sample one-liner about their claimed advantage\nCompetitor B: Sample one-liner\nCompetitor C: Sample one-liner';
+  d.value.sttResponse = 'Sample counter-message with supporting evidence.\nSample second counter-message.\nSample third counter-message.';
+  d.value.problemStatement = 'Sample client problem statement describing pain points and frictions.';
+  d.value.sttSolution = 'Sample solution description aligned to the stated client problem.';
+  d.value.clientOutcomes = 'Sample outcomes the client will experience from the solution.';
+  d.value.redFlags = '• Sample risk or objection one\n• Sample risk two\n• Sample risk three';
+  d.value.mitigation = '• Sample mitigation message for risk one\n• Sample mitigation for risk two';
+  d.swot.strength = '• Sample strength one\n• Sample strength two\n• Sample strength three';
+  d.swot.weakness = '• Sample weakness one\n• Sample weakness two';
+  d.swot.opportunity = '• Sample opportunity one\n• Sample opportunity two';
+  d.swot.threat = '• Sample threat one\n• Sample threat two';
+  d.competitors = [
+    { name: 'Competitor A', overview: 'Sample overview', quality: 'Sample quality point', price: 'Sample', liftOut: 'Sample capability note', technology: 'Sample tech note' },
+    { name: 'Competitor B', overview: 'Sample overview', quality: 'Sample quality point', price: 'Sample', liftOut: 'Sample capability note', technology: 'Sample tech note' },
+    { name: 'Our firm', overview: 'Sample positioning statement', quality: 'Sample quality point', price: 'Sample', liftOut: 'Sample capability note', technology: 'Sample tech note' }
+  ];
+  d.goals = [
+    { strategy: 'Sample strategy', goal: 'Sample goal description', owner: 'Sample Owner A', action: 'Sample action item', targetDate: 'Q3 2026', status: 'green', comments: 'Sample status update' },
+    { strategy: 'Sample strategy', goal: 'Sample goal description', owner: 'Sample Owner B', action: 'Sample action item', targetDate: 'Q3 2026', status: 'amber', comments: 'Sample comment' },
+    { strategy: 'Sample strategy', goal: 'Sample goal description', owner: 'Sample Owner A', action: 'Sample action item', targetDate: 'Q4 2026', status: 'red', comments: 'Sample blocker' }
+  ];
+  d.recentMeetings = [
+    { date: '2026-04-10', with: 'Sample attendees', topics: 'Sample topics covered', notes: 'Sample notes / what we learned from this meeting.' }
+  ];
+  d.upcomingMeetings = [
+    { date: '2026-06-15', client: 'Sample client attendees', stt: 'Sample internal attendees', focus: 'Sample agenda and focus points for the upcoming meeting.' }
+  ];
+  d.updatedAt = Date.now() - (3 * 24 * 60 * 60 * 1000);
+  return d;
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.warn('Save failed', e); }
+}
+
+function activeDeal() { return state.deals.find(d => d.id === activeId); }
+
+function markUpdated() {
+  const d = activeDeal();
+  if (!d) return;
+  d.updatedAt = Date.now();
+  save();
+  renderSaveBar();
+  renderSidebar();
+}
+
+function daysSince(ts) { return Math.floor((Date.now() - ts) / (1000 * 60 * 60 * 24)); }
+function freshnessClass(ts) {
+  const d = daysSince(ts);
+  if (d <= 14) return 'green';
+  if (d <= 30) return 'amber';
+  return 'red';
+}
+function freshnessLabel(ts) {
+  const d = daysSince(ts);
+  if (d === 0) return 'updated today';
+  if (d === 1) return 'updated 1d ago';
+  return `updated ${d}d ago`;
+}
+
+function renderSidebar() {
+  const list = document.getElementById('dealList');
+  list.innerHTML = '';
+  state.deals.forEach(d => {
+    const li = document.createElement('li');
+    li.className = 'deal-item' + (d.id === activeId ? ' active' : '');
+    li.innerHTML = `
+      <div class="freshness-dot freshness-${freshnessClass(d.updatedAt)}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="deal-name">${escapeHTML(d.name)}</div>
+        <div class="deal-meta">${escapeHTML(d.owner || 'No owner')} · ${freshnessLabel(d.updatedAt)}</div>
+      </div>
+    `;
+    li.onclick = () => { activeId = d.id; activeTab = 'summary'; render(); };
+    list.appendChild(li);
+  });
+}
+
+function render() {
+  renderSidebar();
+  const main = document.getElementById('main');
+  const d = activeDeal();
+  if (!d) {
+    main.innerHTML = `
+      <div class="empty">
+        <div class="empty-art">∅</div>
+        <h2>No deal plan selected</h2>
+        <p>Create a new deal plan from the sidebar to begin.</p>
+      </div>`;
+    document.getElementById('saveBar').classList.add('hidden');
+    return;
+  }
+  document.getElementById('saveBar').classList.remove('hidden');
+  main.innerHTML = `
+    <div class="deal-header">
+      <div class="deal-title-row">
+        <h1 contenteditable="true" data-field="name">${escapeHTML(d.name)}</h1>
+        <span class="freshness-pill ${freshnessClass(d.updatedAt)}">
+          ● ${freshnessLabel(d.updatedAt)}
+        </span>
+      </div>
+      <div class="deal-sub">Lead owner: <span contenteditable="true" data-field="owner">${escapeHTML(d.owner || 'Unassigned')}</span></div>
+    </div>
+    <div class="tabs" id="tabs">
+      ${SECTIONS.map(s => `<button class="tab ${activeTab === s ? 'active' : ''}" data-tab="${s}">${TAB_LABELS[s]}</button>`).join('')}
+    </div>
+    <div id="panel"></div>
+  `;
+  main.querySelectorAll('[contenteditable]').forEach(el => {
+    el.addEventListener('blur', () => {
+      d[el.dataset.field] = el.textContent.trim();
+      markUpdated();
+    });
+  });
+  main.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      activeTab = t.dataset.tab;
+      render();
+    });
+  });
+  renderPanel();
+  renderSaveBar();
+}
+
+function renderSaveBar() {
+  const d = activeDeal();
+  if (!d) return;
+  document.getElementById('lastUpdated').textContent = freshnessLabel(d.updatedAt);
+}
+
+function renderPanel() {
+  const panel = document.getElementById('panel');
+  const d = activeDeal();
+  if (!d) return;
+  panel.className = 'panel active';
+  if (activeTab === 'summary') panel.innerHTML = renderSummary(d);
+  if (activeTab === 'engagement') panel.innerHTML = renderEngagement(d);
+  if (activeTab === 'value') panel.innerHTML = renderValue(d);
+  if (activeTab === 'swot') panel.innerHTML = renderSWOT(d);
+  if (activeTab === 'goals') panel.innerHTML = renderGoals(d);
+  if (activeTab === 'meetings') panel.innerHTML = renderMeetings(d);
+  bindFields();
+}
+
+function renderSummary(d) {
+  const p = d.profile;
+  return `
+    <h2 class="section-title">Client snapshot</h2>
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-label">AUM</div>
+        <input data-path="profile.aum" value="${escapeAttr(p.aum)}" placeholder="—">
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Revenue (current)</div>
+        <input data-path="profile.revenue" value="${escapeAttr(p.revenue)}" placeholder="—">
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Incremental ($)</div>
+        <input data-path="profile.incrementalRevenue" value="${escapeAttr(p.incrementalRevenue)}" placeholder="—">
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Decision date</div>
+        <input data-path="profile.decisionDate" value="${escapeAttr(p.decisionDate)}" placeholder="—">
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Share of wallet</div>
+        <input data-path="profile.shareOfWallet" value="${escapeAttr(p.shareOfWallet)}" placeholder="—">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Prior RAG</label>
+        ${ragSelectHTML('profile.priorRAG', p.priorRAG)}
+      </div>
+      <div class="field">
+        <label>Current RAG</label>
+        ${ragSelectHTML('profile.currentRAG', p.currentRAG)}
+      </div>
+      <div class="field">
+        <label>Segment</label>
+        <input data-path="profile.segment" value="${escapeAttr(p.segment)}" placeholder="e.g. Asset Owner">
+      </div>
+      <div class="field">
+        <label>Acquisition profile</label>
+        <input data-path="profile.acquisitionProfile" value="${escapeAttr(p.acquisitionProfile)}" placeholder="e.g. New business / expansion">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Strategic focus areas</div>
+      <div class="card-body">
+        <textarea data-path="profile.strategicFocus" placeholder="What the client is focused on…">${escapeHTML(p.strategicFocus)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">What's working well</div>
+      <div class="card-body">
+        <textarea data-path="profile.whatsWorking" placeholder="Current state…">${escapeHTML(p.whatsWorking)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">What's needed / issues / concerns</div>
+      <div class="card-body">
+        <textarea data-path="profile.whatsNeeded" placeholder="Gaps, blockers…">${escapeHTML(p.whatsNeeded)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Our strategy for this client</div>
+      <div class="card-body">
+        <textarea data-path="profile.nextStrategy" placeholder="Where we're heading…">${escapeHTML(p.nextStrategy)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderEngagement(d) {
+  const rows = d.engagement.map((c, i) => `
+    <tr>
+      <td><input data-list="engagement" data-i="${i}" data-k="contact" value="${escapeAttr(c.contact)}" placeholder="Name"></td>
+      <td><input data-list="engagement" data-i="${i}" data-k="position" value="${escapeAttr(c.position)}" placeholder="Title"></td>
+      <td>
+        <select data-list="engagement" data-i="${i}" data-k="role">
+          ${['Decision Maker','Decision Blocker','Champion','Influencer','Sponsor','Other'].map(r =>
+            `<option ${c.role===r?'selected':''}>${r}</option>`).join('')}
+        </select>
+      </td>
+      <td><input data-list="engagement" data-i="${i}" data-k="sttOwner" value="${escapeAttr(c.sttOwner)}" placeholder="Internal owner"></td>
+      <td>${ragSelectHTML(null, c.rag, {list:'engagement', i, k:'rag'})}</td>
+      <td><textarea data-list="engagement" data-i="${i}" data-k="path" rows="2" placeholder="How to develop the relationship">${escapeHTML(c.path)}</textarea></td>
+      <td><input data-list="engagement" data-i="${i}" data-k="lastMeeting" value="${escapeAttr(c.lastMeeting)}" placeholder="YYYY-MM"></td>
+      <td><button class="remove-row" data-rm-list="engagement" data-rm-i="${i}">✕</button></td>
+    </tr>
+  `).join('');
+  return `
+    <h2 class="section-title">Executive &amp; consultant engagement map</h2>
+    <p class="section-sub">Track relationships, decision roles, and the path to development.</p>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Contact</th><th>Position</th><th>Role</th><th>Internal owner</th>
+          <th>RAG</th><th>Path to development</th><th>Last meeting</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="table-foot">
+        <button class="add-row-btn" data-add="engagement">+ Add contact</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">What's next — engagement timeline</h2>
+    <div class="card">
+      <div class="card-body">
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="timeline-step-label">Phase 1</div>
+            <textarea data-path="upcomingPhase1" rows="3" placeholder="Near-term activities…">${escapeHTML(d.upcomingPhase1 || '')}</textarea>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-step-label">Phase 2</div>
+            <textarea data-path="upcomingPhase2" rows="3" placeholder="Mid-term activities…">${escapeHTML(d.upcomingPhase2 || '')}</textarea>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-step-label">Phase 3</div>
+            <textarea data-path="upcomingPhase3" rows="3" placeholder="Longer-term activities…">${escapeHTML(d.upcomingPhase3 || '')}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderValue(d) {
+  const v = d.value;
+  return `
+    <h2 class="section-title">Value proposition &amp; how we're selling</h2>
+
+    <div class="field-row">
+      <div class="card" style="margin:0">
+        <div class="card-header">Client business objective</div>
+        <div class="card-body">
+          <textarea data-path="value.objective" rows="6" placeholder="What's driving them…">${escapeHTML(v.objective)}</textarea>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="card-header">How we're selling — differentiated message</div>
+        <div class="card-body">
+          <textarea data-path="value.howWeSell" rows="6" placeholder="Unique angles with proof points…">${escapeHTML(v.howWeSell)}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <div class="field-row">
+      <div class="card" style="margin:0">
+        <div class="card-header">Competitor talk-track</div>
+        <div class="card-body">
+          <textarea data-path="value.competitorTalk" rows="5" placeholder="One-liner per key competitor…">${escapeHTML(v.competitorTalk)}</textarea>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="card-header">Our response (with proof)</div>
+        <div class="card-body">
+          <textarea data-path="value.sttResponse" rows="5" placeholder="Counter / advantage / similar capability…">${escapeHTML(v.sttResponse)}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <h2 class="section-title">Value pathway</h2>
+    <div class="field-row">
+      <div class="card" style="margin:0">
+        <div class="card-header">Client problem statement</div>
+        <div class="card-body">
+          <textarea data-path="value.problemStatement" rows="4">${escapeHTML(v.problemStatement)}</textarea>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="card-header">Our solution</div>
+        <div class="card-body">
+          <textarea data-path="value.sttSolution" rows="4">${escapeHTML(v.sttSolution)}</textarea>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="card-header">Client outcomes</div>
+        <div class="card-body">
+          <textarea data-path="value.clientOutcomes" rows="4">${escapeHTML(v.clientOutcomes)}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <div class="field-row">
+      <div class="card" style="margin:0">
+        <div class="card-header">Red flags</div>
+        <div class="card-body">
+          <textarea data-path="value.redFlags" rows="4">${escapeHTML(v.redFlags)}</textarea>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="card-header">Mitigation message &amp; plan</div>
+        <div class="card-body">
+          <textarea data-path="value.mitigation" rows="4">${escapeHTML(v.mitigation)}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSWOT(d) {
+  const s = d.swot;
+  const rows = d.competitors.map((c, i) => `
+    <tr>
+      <td><input data-list="competitors" data-i="${i}" data-k="name" value="${escapeAttr(c.name)}" placeholder="Competitor"></td>
+      <td><textarea data-list="competitors" data-i="${i}" data-k="overview" rows="3">${escapeHTML(c.overview)}</textarea></td>
+      <td><textarea data-list="competitors" data-i="${i}" data-k="quality" rows="3">${escapeHTML(c.quality)}</textarea></td>
+      <td><input data-list="competitors" data-i="${i}" data-k="price" value="${escapeAttr(c.price)}"></td>
+      <td><textarea data-list="competitors" data-i="${i}" data-k="liftOut" rows="3">${escapeHTML(c.liftOut)}</textarea></td>
+      <td><textarea data-list="competitors" data-i="${i}" data-k="technology" rows="3">${escapeHTML(c.technology)}</textarea></td>
+      <td><button class="remove-row" data-rm-list="competitors" data-rm-i="${i}">✕</button></td>
+    </tr>
+  `).join('');
+  return `
+    <h2 class="section-title">SWOT</h2>
+    <div class="swot-grid">
+      <div class="swot-box">
+        <div class="swot-box-header">Strengths</div>
+        <textarea data-path="swot.strength" placeholder="What we're winning on…">${escapeHTML(s.strength)}</textarea>
+      </div>
+      <div class="swot-box weakness">
+        <div class="swot-box-header">Weaknesses</div>
+        <textarea data-path="swot.weakness" placeholder="Where we're vulnerable…">${escapeHTML(s.weakness)}</textarea>
+      </div>
+      <div class="swot-box opportunity">
+        <div class="swot-box-header">Opportunities</div>
+        <textarea data-path="swot.opportunity" placeholder="Tailwinds…">${escapeHTML(s.opportunity)}</textarea>
+      </div>
+      <div class="swot-box threat">
+        <div class="swot-box-header">Threats</div>
+        <textarea data-path="swot.threat" placeholder="Headwinds…">${escapeHTML(s.threat)}</textarea>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <h2 class="section-title">Competitive landscape</h2>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Competitor</th><th>Overview</th><th>Quality</th><th>Price</th>
+          <th>Capability</th><th>Technology</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="table-foot">
+        <button class="add-row-btn" data-add="competitors">+ Add competitor</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderGoals(d) {
+  const rows = d.goals.map((g, i) => `
+    <tr>
+      <td><input data-list="goals" data-i="${i}" data-k="strategy" value="${escapeAttr(g.strategy)}" placeholder="Strategy"></td>
+      <td><input data-list="goals" data-i="${i}" data-k="goal" value="${escapeAttr(g.goal)}" placeholder="Goal"></td>
+      <td><input data-list="goals" data-i="${i}" data-k="owner" value="${escapeAttr(g.owner)}" placeholder="Owner"></td>
+      <td><input data-list="goals" data-i="${i}" data-k="action" value="${escapeAttr(g.action)}" placeholder="Action"></td>
+      <td><input data-list="goals" data-i="${i}" data-k="targetDate" value="${escapeAttr(g.targetDate)}" placeholder="Q2 2026"></td>
+      <td>${ragSelectHTML(null, g.status, {list:'goals', i, k:'status'})}</td>
+      <td><input data-list="goals" data-i="${i}" data-k="comments" value="${escapeAttr(g.comments)}" placeholder="Status update"></td>
+      <td><button class="remove-row" data-rm-list="goals" data-rm-i="${i}">✕</button></td>
+    </tr>
+  `).join('');
+  return `
+    <h2 class="section-title">Detailed goals → actions</h2>
+    <p class="section-sub">Strategy down to action: owner, target date, status, latest update.</p>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Strategy</th><th>Goal</th><th>Owner</th><th>Action</th>
+          <th>Target date</th><th>Status</th><th>Comments / update</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="table-foot">
+        <button class="add-row-btn" data-add="goals">+ Add goal</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderMeetings(d) {
+  return `
+    <h2 class="section-title">Upcoming meetings</h2>
+    <div id="upcomingList">
+      ${d.upcomingMeetings.map((m, i) => `
+        <div class="meeting-card upcoming">
+          <div class="meeting-head">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:14px;margin-bottom:2px">
+                <input data-list="upcomingMeetings" data-i="${i}" data-k="client" value="${escapeAttr(m.client)}" placeholder="Client attendees" style="width:100%;border:none;padding:0;font-weight:600;font-size:14px;background:transparent;color:var(--ink)">
+              </div>
+              <div style="color:var(--ink-mute);font-size:12px">
+                <input data-list="upcomingMeetings" data-i="${i}" data-k="stt" value="${escapeAttr(m.stt)}" placeholder="Internal attendees" style="width:100%;border:none;padding:0;color:var(--ink-mute);font-size:12px;background:transparent">
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span class="meeting-date">
+                <input data-list="upcomingMeetings" data-i="${i}" data-k="date" value="${escapeAttr(m.date)}" placeholder="Date" style="width:120px;border:none;padding:0;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;background:transparent;color:var(--ink-mute)">
+              </span>
+              <button class="remove-row" data-rm-list="upcomingMeetings" data-rm-i="${i}">✕</button>
+            </div>
+          </div>
+          <textarea data-list="upcomingMeetings" data-i="${i}" data-k="focus" rows="3" placeholder="What we need to focus on…">${escapeHTML(m.focus)}</textarea>
+        </div>
+      `).join('')}
+    </div>
+    <button class="add-row-btn" data-add="upcomingMeetings">+ Add upcoming meeting</button>
+
+    <div style="height:32px"></div>
+
+    <h2 class="section-title">Recent meetings</h2>
+    <div id="recentList">
+      ${d.recentMeetings.map((m, i) => `
+        <div class="meeting-card past">
+          <div class="meeting-head">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:14px;margin-bottom:2px">
+                <input data-list="recentMeetings" data-i="${i}" data-k="with" value="${escapeAttr(m.with)}" placeholder="Attendees" style="width:100%;border:none;padding:0;font-weight:600;font-size:14px;background:transparent;color:var(--ink)">
+              </div>
+              <div style="color:var(--ink-mute);font-size:12px">
+                <input data-list="recentMeetings" data-i="${i}" data-k="topics" value="${escapeAttr(m.topics)}" placeholder="Topics" style="width:100%;border:none;padding:0;color:var(--ink-mute);font-size:12px;background:transparent">
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span class="meeting-date">
+                <input data-list="recentMeetings" data-i="${i}" data-k="date" value="${escapeAttr(m.date)}" placeholder="Date" style="width:120px;border:none;padding:0;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;background:transparent;color:var(--ink-mute)">
+              </span>
+              <button class="remove-row" data-rm-list="recentMeetings" data-rm-i="${i}">✕</button>
+            </div>
+          </div>
+          <textarea data-list="recentMeetings" data-i="${i}" data-k="notes" rows="3" placeholder="What did we learn…">${escapeHTML(m.notes)}</textarea>
+        </div>
+      `).join('')}
+    </div>
+    <button class="add-row-btn" data-add="recentMeetings">+ Add past meeting</button>
+  `;
+}
+
+function ragSelectHTML(path, value, listInfo) {
+  const attr = listInfo
+    ? `data-list="${listInfo.list}" data-i="${listInfo.i}" data-k="${listInfo.k}"`
+    : `data-path="${path}"`;
+  return `
+    <select ${attr} class="rag-select ${value}" data-rag>
+      <option value="green" ${value==='green'?'selected':''}>● GREEN</option>
+      <option value="amber" ${value==='amber'?'selected':''}>● AMBER</option>
+      <option value="red" ${value==='red'?'selected':''}>● RED</option>
+    </select>
+  `;
+}
+
+function bindFields() {
+  const d = activeDeal();
+  if (!d) return;
+  document.querySelectorAll('[data-path]').forEach(el => {
+    el.addEventListener('input', () => {
+      setByPath(d, el.dataset.path, el.value !== undefined ? el.value : el.textContent);
+      if (el.dataset.rag) el.className = 'rag-select ' + el.value;
+      markUpdated();
+    });
+  });
+  document.querySelectorAll('[data-list]').forEach(el => {
+    el.addEventListener('input', () => {
+      const list = el.dataset.list;
+      const i = parseInt(el.dataset.i);
+      const k = el.dataset.k;
+      d[list][i][k] = el.value;
+      if (el.dataset.rag) el.className = 'rag-select ' + el.value;
+      markUpdated();
+    });
+  });
+  document.querySelectorAll('[data-add]').forEach(b => {
+    b.addEventListener('click', () => {
+      const list = b.dataset.add;
+      const blanks = {
+        engagement: { contact:'', position:'', role:'Influencer', sttOwner:'', rag:'amber', path:'', lastMeeting:'' },
+        competitors: { name:'', overview:'', quality:'', price:'', liftOut:'', technology:'' },
+        goals: { strategy:'', goal:'', owner:'', action:'', targetDate:'', status:'amber', comments:'' },
+        upcomingMeetings: { date:'', client:'', stt:'', focus:'' },
+        recentMeetings: { date:'', with:'', topics:'', notes:'' }
+      };
+      d[list].push({...blanks[list]});
+      markUpdated();
+      renderPanel();
+    });
+  });
+  document.querySelectorAll('[data-rm-list]').forEach(b => {
+    b.addEventListener('click', () => {
+      const list = b.dataset.rmList;
+      const i = parseInt(b.dataset.rmI);
+      d[list].splice(i, 1);
+      markUpdated();
+      renderPanel();
+    });
+  });
+}
+
+function setByPath(obj, path, val) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!cur[parts[i]]) cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = val;
+}
+
+function escapeHTML(s='') {
+  return String(s).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+function escapeAttr(s='') { return escapeHTML(s); }
+
+const modal = document.getElementById('modal');
+document.getElementById('newDealBtn').onclick = () => {
+  document.getElementById('newDealName').value = '';
+  document.getElementById('newDealOwner').value = '';
+  modal.classList.add('show');
+  setTimeout(() => document.getElementById('newDealName').focus(), 50);
+};
+document.getElementById('cancelNew').onclick = () => modal.classList.remove('show');
+document.getElementById('createNew').onclick = () => {
+  const name = document.getElementById('newDealName').value.trim() || 'Untitled deal';
+  const owner = document.getElementById('newDealOwner').value.trim();
+  const d = blank(name, owner);
+  state.deals.unshift(d);
+  activeId = d.id;
+  activeTab = 'summary';
+  save();
+  render();
+  modal.classList.remove('show');
+};
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) modal.classList.remove('show');
+});
+
+render();
+</script>
+</body>
+</html>
